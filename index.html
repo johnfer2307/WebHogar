@@ -93,21 +93,21 @@
         <!-- CALENDARIO -->
         <div class="p-1">
             <div id="calendarGrid" class="calendar-grid">
-                <!-- Inyección JS -->
+                <!-- Inyectado por JS -->
             </div>
         </div>
 
         <!-- FOOTER -->
         <div class="p-6 bg-slate-50 border-t text-xs text-gray-500 grid md:grid-cols-2 gap-4">
             <div>
-                <p><strong>Notas de Funcionamiento (Año 2026):</strong></p>
+                <p><strong>Reglas de Almuerzos Actualizadas (2026):</strong></p>
                 <ul class="list-disc ml-4 mt-2 space-y-1">
-                    <li>Los festivos rotan el almuerzo entre Johncito y Katherin.</li>
-                    <li>La desinfección de baños, basura y barrido se rotan equitativamente entre los 3.</li>
+                    <li><strong>Lunes a Viernes:</strong> Prespos (siempre que no sea festivo).</li>
+                    <li><strong>Sábados, Domingos y Festivos:</strong> Rotación estricta entre Johncito y Katherin (Prespos excluido).</li>
                 </ul>
             </div>
             <div class="text-right">
-                <p>⚠️ En caso de novedad laboral o de estudio, realizar sinergia de apoyo.</p>
+                <p>⚠️ Sistema de rotación secuencial para equidad en días especiales.</p>
             </div>
         </div>
     </div>
@@ -130,12 +130,27 @@
 
         function isHoliday(dateStr) { return holidays.includes(dateStr); }
 
-        function getHolidayPosition(date) {
-            let count = 0;
-            for (let h of holidays) {
-                if (new Date(h).getTime() < date.getTime()) count++;
+        /**
+         * Calcula el índice de rotación para días especiales (Sáb, Dom y Festivos).
+         * Cuenta cuántos de estos días han pasado desde el inicio del año para alternar entre Johncito y Katherin.
+         */
+        function getSpecialDayRotation(date) {
+            let specialDaysCount = 0;
+            let tempDate = new Date(date.getFullYear(), 0, 1);
+            
+            while (tempDate <= date) {
+                const dayOfWeek = tempDate.getDay();
+                const dateStr = tempDate.toISOString().split('T')[0];
+                const isH = isHoliday(dateStr);
+                const isW = (dayOfWeek === 0 || dayOfWeek === 6);
+
+                if (isH || isW) {
+                    specialDaysCount++;
+                }
+                tempDate.setDate(tempDate.getDate() + 1);
             }
-            return count;
+            // Retorna 0 (Johncito) o 1 (Katherin) basado en la cuenta secuencial
+            return (specialDaysCount - 1) % 2; 
         }
 
         function setView(view) {
@@ -213,14 +228,19 @@
 
             let tasks = [];
 
+            // --- LÓGICA DE ALMUERZO ACTUALIZADA ---
             if (!isWeekend && !isH) {
+                // Lunes a Viernes (no festivo): Prespos
                 tasks.push({ text: '🍴 Almuerzo: Prespos', class: 'user-prespos' });
-            } else if (isH) {
-                const hIdx = getHolidayPosition(date);
-                const chef = (hIdx % 2 === 0) ? 'Johncito' : 'Katherin';
-                tasks.push({ text: `🎉 Almuerzo: ${chef}`, class: chef === 'Johncito' ? 'user-johncito' : 'user-katherin' });
+            } else {
+                // Sábados, Domingos o Festivos: Rotación entre Johncito y Katherin
+                const specialChefIdx = getSpecialDayRotation(date);
+                const chefName = (specialChefIdx === 0) ? 'Johncito' : 'Katherin';
+                const prefix = isH ? '🎉' : '🍴';
+                tasks.push({ text: `${prefix} Almuerzo: ${chefName}`, class: `user-${chefName.toLowerCase()}` });
             }
 
+            // --- Aseo Diario ---
             const p1 = persons[dayOfYear % 3];
             const p2 = persons[(dayOfYear + 1) % 3];
             const p3 = persons[(dayOfYear + 2) % 3];
@@ -228,6 +248,7 @@
             tasks.push({ text: `🧹 Barrer/Trapear: ${p2}`, class: `user-${p2.toLowerCase()}` });
             tasks.push({ text: `🗑️ Basura: ${p3}`, class: `user-${p3.toLowerCase()}` });
 
+            // --- Tareas Especiales Semanales ---
             if (dayOfWeek === 6) {
                 const jOrP = (weekNum % 2 === 0) ? 'Johncito' : 'Prespos';
                 tasks.push({ text: `🚿 Ducha Ppal: ${jOrP}`, class: `user-${jOrP.toLowerCase()}` });
@@ -271,7 +292,7 @@
                             <span class="text-xl font-black ${isH ? 'text-red-600' : 'text-slate-800'}">${day}</span>
                             <span class="text-[10px] font-bold tracking-tighter text-slate-400">${name}</span>
                         </div>
-                        ${isH ? '<span class="mt-1 text-[8px] bg-red-600 text-white px-1 py-0.5 rounded w-fit font-black">FESTIVO</span>' : ''}
+                        ${isH ? '<span class="mt-1 text-[8px] bg-red-600 text-white px-1 py-0.5 rounded w-fit font-black uppercase tracking-tighter">Festivo</span>' : ''}
                     </div>
                     <div class="space-y-1">${tasks}</div>
                 </div>
@@ -310,4 +331,5 @@
         window.onload = renderCalendar;
     </script>
 </body>
+</html>
 </html>
