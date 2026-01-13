@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendario de Aseo del Hogar 2026 V1.5</title>
+    <title>Calendario de Aseo del Hogar 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -112,16 +112,17 @@
         <!-- FOOTER -->
         <div class="p-6 bg-slate-50 border-t text-[11px] text-gray-500 grid md:grid-cols-2 gap-6">
             <div class="space-y-2">
-                <p class="font-bold text-slate-700">DESAYUNOS Y ALMUERZOS:</p>
+                <p class="font-bold text-slate-700">REGLAS GENERALES:</p>
                 <ul class="list-disc ml-4 space-y-1">
-                    <li>Lunes a Viernes: <span class="font-semibold text-slate-600">Prespos</span> (excepto festivos).</li>
-                    <li>Fines de semana y Festivos: <span class="font-semibold text-slate-600">Johncito y Katherin</span> (rotación secuencial).</li>
+                    <li>Desayunos/Almuerzos (Lun-Vie): <span class="font-semibold text-slate-600">Prespos</span>.</li>
+                    <li>Sábados, Domingos y Festivos: <span class="font-semibold text-slate-600">Rotación Johncito y Katherin</span>.</li>
+                    <li class="text-slate-800 font-bold italic underline">En la actividad de Desinfección de baños, después de desinfectar trapear nuevamente el baño.</li>
                 </ul>
             </div>
             <div class="md:text-right space-y-1">
-                <p>⚠️ La rotación secuencial asegura equilibrio en días de descanso.</p>
-                <p>☁️ Almohadas J & P: <span class="font-bold">Miércoles y Sábados</span>.</p>
-                <p class="text-slate-900 font-bold">🛏️ Cambiar Camas: Sábado de por medio (17-Ene, 31-Ene, 14-Feb...).</p>
+                <p>⚠️ Sistema de rotación secuencial para equidad.</p>
+                <p>☁️ Almohadas J & P: Miércoles y Sábados.</p>
+                <p class="text-slate-900 font-bold">🛏️ Cambiar Camas: Sábado de por medio (17-Ene, 31-Ene, etc).</p>
             </div>
         </div>
     </div>
@@ -222,20 +223,14 @@
 
             let tasks = [];
 
-            // --- 1. LOGICA CAMBIO DE CAMAS (SÁBADO DE POR MEDIO INICIANDO 17-ENE) ---
-            if (dayOfWeek === 6) { // Es Sábado
-                // Fecha de referencia: Sábado 17 de Enero (Semana 2 del año aproximadamente)
+            if (dayOfWeek === 6) { 
                 const refDate = new Date(2026, 0, 17);
-                // Calculamos cuántos días han pasado y lo dividimos por 7 para saber cuántas semanas
                 const weeksSinceStart = Math.round((date - refDate) / (1000 * 60 * 60 * 24 * 7));
-                
-                // Si weeksSinceStart es 0 (17-Ene), 2 (31-Ene), 4 (14-Feb)... toca cama
                 if (weeksSinceStart >= 0 && weeksSinceStart % 2 === 0) {
                     tasks.push({ text: '🛏️ CAMBIAR CAMAS', class: 'task-beds' });
                 }
             }
 
-            // --- 2. DESAYUNO Y ALMUERZO ---
             if (!isWeekend && !isH) {
                 tasks.push({ text: '🍴 Desayuno/Alm: Prespos', class: 'user-prespos' });
             } else {
@@ -243,15 +238,13 @@
                 tasks.push({ text: `${isH ? '🎉' : '🍴'} Desayuno/Alm: ${chefName}`, class: `user-${chefName.toLowerCase()}` });
             }
 
-            // --- 3. ASEO DIARIO ---
             const p1 = persons[dayOfYear % 3];
             const p2 = persons[(dayOfYear + 1) % 3];
             const p3 = persons[(dayOfYear + 2) % 3];
-            tasks.push({ text: `🧼 Baños: ${p1}`, class: `user-${p1.toLowerCase()}` });
+            tasks.push({ text: `🧼 Desinf. Baños: ${p1}`, class: `user-${p1.toLowerCase()}` });
             tasks.push({ text: `🧹 Barrer/Trapear: ${p2}`, class: `user-${p2.toLowerCase()}` });
             tasks.push({ text: `🗑️ Basura: ${p3}`, class: `user-${p3.toLowerCase()}` });
 
-            // --- 4. TAREAS SEMANALES ---
             if (dayOfWeek === 6) { 
                 const jOrP = (weekNum % 2 === 0) ? 'Johncito' : 'Prespos';
                 tasks.push({ text: `🚿 Ducha Ppal: ${jOrP}`, class: `user-${jOrP.toLowerCase()}` });
@@ -259,15 +252,11 @@
                 tasks.push({ text: '☁️ Almohadas J & P', class: 'user-shared' });
             }
 
-            if (dayOfWeek === 3) { 
-                tasks.push({ text: '☁️ Almohadas J & P', class: 'user-shared' });
-            }
-
+            if (dayOfWeek === 3) { tasks.push({ text: '☁️ Almohadas J & P', class: 'user-shared' }); }
             if (dayOfWeek === 5) { 
                 const duster = persons[weekNum % 3];
-                tasks.push({ text: `✨ Sacudir: ${duster}`, class: `user-${duster.toLowerCase()}` });
+                tasks.push({ text: `✨ Sacudir: ${duster}`, class: `user-${duster.toLowerCase()}` }); 
             }
-
             if (dayOfWeek === 3 || dayOfWeek === 5) {
                 const laundryIdx = Math.floor(dayOfYear / 3) % 3;
                 tasks.push({ text: `🧺 Ropa: ${persons[laundryIdx]}`, class: `user-${persons[laundryIdx].toLowerCase()}` });
@@ -278,7 +267,6 @@
 
         function createDayCell(day, month, year) {
             if (!day) return `<div class="bg-gray-50 opacity-40"></div>`;
-            
             const date = new Date(year, month, day);
             const isH = isHoliday(date.toISOString().split('T')[0]);
             const isW = (date.getDay() === 0 || date.getDay() === 6);
@@ -301,29 +289,21 @@
             const grid = document.getElementById('calendarGrid');
             const display = document.getElementById('displayLabel');
             const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            
             grid.innerHTML = '';
-            
             if (currentView === 'month') {
                 display.innerText = `${months[currentMonth]} ${currentYear}`;
                 const firstDay = new Date(currentYear, currentMonth, 1);
                 const lastDay = new Date(currentYear, currentMonth + 1, 0);
-                
                 let startOffset = (firstDay.getDay() + 6) % 7; 
                 for (let i = 0; i < startOffset; i++) grid.innerHTML += createDayCell(null);
-
-                for (let d = 1; d <= lastDay.getDate(); d++) {
-                    grid.innerHTML += createDayCell(d, currentMonth, currentYear);
-                }
+                for (let d = 1; d <= lastDay.getDate(); d++) grid.innerHTML += createDayCell(d, currentMonth, currentYear);
             } else {
                 const weeks = getWeeksOfMonth(currentYear, currentMonth);
                 display.innerText = `${months[currentMonth]} - SEM ${currentWeekIndex + 1}`;
                 weeks[currentWeekIndex].forEach(d => grid.innerHTML += createDayCell(d, currentMonth, currentYear));
             }
         }
-
         window.onload = renderCalendar;
     </script>
 </body>
 </html>
-
